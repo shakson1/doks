@@ -1,0 +1,32 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+*.backup
+.terraform.lock.hcl
+
+# Ignore lock files in examples only (allow in root for reproducibility)
+/examples/**/.terraform.lock.hcl
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Backups
+*.bak
+*.old
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+Thumbs.db
+ehthumbs.db 

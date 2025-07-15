@@ -1,0 +1,42 @@
+kube-prometheus-stack:
+  grafana:
+    ingress:
+      enabled: true
+      hosts:
+        - grafana.example.com
+      annotations:
+        kubernetes.io/ingress.class: nginx
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClassName: "do-block-storage"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+  prometheus:
+    ingress:
+      enabled: true
+      hosts:
+        - prometheus.example.com
+      annotations:
+        kubernetes.io/ingress.class: nginx
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: "do-block-storage"
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: 20Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 2Gi 

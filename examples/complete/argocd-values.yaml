@@ -1,0 +1,17 @@
+configs:
+  secret:
+    argocdServerAdminPassword: "$2a$12$EXAMPLEHASHEDPASSWORD"
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - argocd.example.com
+    annotations:
+      kubernetes.io/ingress.class: nginx
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi 

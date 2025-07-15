@@ -8,6 +8,12 @@ variable "region" {
   description = "DigitalOcean region for the cluster."
   type        = string
   default     = "nyc1"
+  validation {
+    condition = contains([
+      "nyc1", "nyc2", "nyc3", "ams3", "sfo2", "sfo3", "sgp1", "lon1", "fra1", "tor1", "blr1", "syd1", "atl1"
+    ], var.region)
+    error_message = "Region must be one of: nyc1, nyc2, nyc3, ams3, sfo2, sfo3, sgp1, lon1, fra1, tor1, blr1, syd1, atl1."
+  }
 }
 
 variable "vpc_id" {
@@ -65,6 +71,24 @@ EOT
       count = 3
     }
   ]
+  validation {
+    condition = alltrue([
+      for np in var.node_pools : contains([
+        "s-1vcpu-512mb-10gb", "s-1vcpu-1gb", "s-2vcpu-2gb", "s-2vcpu-4gb", "s-4vcpu-8gb", "s-8vcpu-16gb",
+        "c-2", "c-4", "c-8", "c-16", "c-32", "c-48",
+        "g-2vcpu-8gb", "g-4vcpu-16gb", "g-8vcpu-32gb", "g-16vcpu-64gb", "g-32vcpu-128gb", "g-40vcpu-160gb",
+        "m-2vcpu-16gb", "m-4vcpu-32gb", "m-8vcpu-64gb", "m-16vcpu-128gb", "m-24vcpu-192gb", "m-32vcpu-256gb",
+        "so-2vcpu-16gb", "so-4vcpu-32gb", "so-8vcpu-64gb", "so-16vcpu-128gb", "so-24vcpu-192gb", "so-32vcpu-256gb"
+      ], np.size)
+    ])
+    error_message = "Each node pool size must be a valid DigitalOcean Droplet size slug. See https://www.digitalocean.com/pricing/droplets for options."
+  }
+  validation {
+    condition = alltrue([
+      for np in var.node_pools : np.count >= 1
+    ])
+    error_message = "Each node pool must have at least 1 node."
+  }
 }
 
 variable "nginx_ingress_chart_version" {
@@ -125,4 +149,14 @@ variable "argocd_helm_values" {
   description = "Custom values for the ArgoCD Helm chart (YAML as string)."
   type        = string
   default     = ""
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all resources (DigitalOcean and Kubernetes labels where possible). Common keys: environment, project, owner."
+  type        = map(string)
+  default     = {
+    environment = "dev"
+    project     = "doks-cluster"
+    owner       = "team"
+  }
 } 

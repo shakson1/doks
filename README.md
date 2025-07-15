@@ -103,6 +103,42 @@ server:
       memory: 1Gi
 ```
 
+## Remote State Recommendations
+To safely manage your Terraform state, use a remote backend such as Terraform Cloud, AWS S3, or DigitalOcean Spaces. Example for S3:
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state-bucket"
+    key    = "digitalocean-kubernetes/terraform.tfstate"
+    region = "us-east-1"
+    encrypt = true
+  }
+}
+```
+
+- For DigitalOcean Spaces, use the S3-compatible backend with your Spaces credentials.
+- For Terraform Cloud, see the [Terraform Cloud documentation](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/configuration).
+
+## Onboarding Tips
+- Ensure your DigitalOcean API token has write permissions for Kubernetes, VPC, and Droplets.
+- Install the latest Terraform CLI (>= 1.3.0) and configure your credentials.
+- Review and customize the example YAML values files for Helm charts in `examples/complete/`.
+- Use the provided examples as a starting point and adjust variables for your environment.
+- Run `terraform init` before your first apply or after changing providers/modules.
+
+## Retrieving Sensitive Outputs Securely
+Some outputs (like kubeconfig, admin passwords) are marked as sensitive. To retrieve them securely:
+
+- Use the Terraform CLI with the `-json` flag for scripting, or the `terraform output` command for human-readable output:
+
+```sh
+terraform output kubeconfig
+terraform output -json grafana_admin_password
+```
+
+- Sensitive outputs will not be shown in the Terraform UI or plan by default. Use the CLI to access them after apply.
+
 ## Advanced Helm Chart Configuration
 
 You can override any Helm chart values by passing YAML as a string to the `*_helm_values` variables. See the [complete example YAML files](examples/complete/) for robust production settings.

@@ -10,8 +10,8 @@ output "cluster_endpoint" {
 }
 
 output "nginx_ingress_loadbalancer_ip" {
-  description = "The raw status of the NGINX ingress Helm release. Check the service in the cluster for the actual IP."
-  value = try(helm_release.nginx_ingress[0].status, null)
+  description = "The external IP of the NGINX ingress LoadBalancer service, if available."
+  value = try(data.kubernetes_service.nginx_ingress.status[0].load_balancer[0].ingress[0].ip, null)
 }
 
 output "prometheus_url" {

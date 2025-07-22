@@ -58,7 +58,7 @@ EOT
     min_nodes = optional(number)
     max_nodes = optional(number)
     labels    = optional(map(string))
-    taints    = optional(list(object({
+    taints = optional(list(object({
       key    = string
       value  = string
       effect = string
@@ -154,9 +154,21 @@ variable "argocd_helm_values" {
 variable "tags" {
   description = "A map of tags to apply to all resources (DigitalOcean and Kubernetes labels where possible). Common keys: environment, project, owner."
   type        = map(string)
-  default     = {
+  default = {
     environment = "dev"
     project     = "doks-cluster"
     owner       = "team"
   }
+}
+
+variable "grafana_chart_version" {
+  description = "Helm chart version for Grafana."
+  type        = string
+  default     = "7.3.9"
+}
+
+variable "argocd_chart_version" {
+  description = "Helm chart version for ArgoCD."
+  type        = string
+  default     = "6.7.12"
 } 

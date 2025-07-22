@@ -5,18 +5,18 @@ provider "digitalocean" {
 
 // Optionally create a VPC if vpc_id is not provided
 resource "digitalocean_vpc" "this" {
-  count = var.vpc_id == null ? 1 : 0
+  count  = var.vpc_id == null ? 1 : 0
   name   = var.vpc_name
   region = var.region
 }
 
 // Kubernetes cluster
 resource "digitalocean_kubernetes_cluster" "this" {
-  name    = var.cluster_name
-  region  = var.region
-  version = var.k8s_version
+  name     = var.cluster_name
+  region   = var.region
+  version  = var.k8s_version
   vpc_uuid = var.vpc_id != null ? var.vpc_id : digitalocean_vpc.this[0].id
-  tags    = values(var.tags)
+  tags     = values(var.tags)
 
   dynamic "node_pool" {
     for_each = var.node_pools
@@ -43,12 +43,8 @@ resource "digitalocean_kubernetes_cluster" "this" {
 
 # Submodule: NGINX Ingress
 module "nginx_ingress" {
-  source = "./modules/nginx_ingress"
-  kubeconfig = {
-    host                   = digitalocean_kubernetes_cluster.this.endpoint
-    token                  = digitalocean_kubernetes_cluster.this.kube_config[0].token
-    cluster_ca_certificate = digitalocean_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
-  }
+  source                      = "./modules/nginx_ingress"
+  kube_config                 = digitalocean_kubernetes_cluster.this.kube_config[0]
   nginx_ingress_chart_version = var.nginx_ingress_chart_version
   nginx_ingress_helm_values   = var.nginx_ingress_helm_values
   enable_nginx_ingress        = var.enable_nginx_ingress
@@ -56,12 +52,8 @@ module "nginx_ingress" {
 
 # Submodule: Prometheus
 module "prometheus" {
-  source = "./modules/prometheus"
-  kubeconfig = {
-    host                   = digitalocean_kubernetes_cluster.this.endpoint
-    token                  = digitalocean_kubernetes_cluster.this.kube_config[0].token
-    cluster_ca_certificate = digitalocean_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
-  }
+  source                   = "./modules/prometheus"
+  kube_config              = digitalocean_kubernetes_cluster.this.kube_config[0]
   prometheus_chart_version = var.prometheus_chart_version
   prometheus_helm_values   = var.prometheus_helm_values
   enable_prometheus        = var.enable_prometheus
@@ -69,26 +61,18 @@ module "prometheus" {
 
 # Submodule: Grafana
 module "grafana" {
-  source = "./modules/grafana"
-  kubeconfig = {
-    host                   = digitalocean_kubernetes_cluster.this.endpoint
-    token                  = digitalocean_kubernetes_cluster.this.kube_config[0].token
-    cluster_ca_certificate = digitalocean_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
-  }
-  grafana_chart_version = "7.3.9"
+  source                = "./modules/grafana"
+  kube_config           = digitalocean_kubernetes_cluster.this.kube_config[0]
+  grafana_chart_version = var.grafana_chart_version
   grafana_helm_values   = var.grafana_helm_values
   enable_grafana        = var.enable_grafana
 }
 
 # Submodule: ArgoCD
 module "argocd" {
-  source = "./modules/argocd"
-  kubeconfig = {
-    host                   = digitalocean_kubernetes_cluster.this.endpoint
-    token                  = digitalocean_kubernetes_cluster.this.kube_config[0].token
-    cluster_ca_certificate = digitalocean_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
-  }
-  argocd_chart_version = "6.7.12"
+  source               = "./modules/argocd"
+  kube_config          = digitalocean_kubernetes_cluster.this.kube_config[0]
+  argocd_chart_version = var.argocd_chart_version
   argocd_helm_values   = var.argocd_helm_values
   enable_argocd        = var.enable_argocd
 }

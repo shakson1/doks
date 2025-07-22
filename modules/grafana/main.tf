@@ -1,5 +1,5 @@
-variable "kubeconfig" {
-  description = "Kubeconfig for the Kubernetes cluster."
+variable "kube_config" {
+  description = "Kubernetes kube_config object (from digitalocean_kubernetes_cluster.this.kube_config[0])."
   type        = any
 }
 
@@ -22,9 +22,9 @@ variable "enable_grafana" {
 
 provider "helm" {
   kubernetes = {
-    host                   = var.kubeconfig["host"]
-    token                  = var.kubeconfig["token"]
-    cluster_ca_certificate = base64decode(var.kubeconfig["cluster_ca_certificate"])
+    host                   = var.kube_config["host"]
+    token                  = var.kube_config["token"]
+    cluster_ca_certificate = base64decode(var.kube_config["cluster_ca_certificate"])
   }
 }
 

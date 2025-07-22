@@ -18,6 +18,43 @@ Deploy a production-ready Kubernetes cluster on DigitalOcean with NGINX Ingress,
 ## Usage
 See the [basic example](examples/basic/main.tf) for a minimal setup, or the [complete example](examples/complete/main.tf) for a full production configuration.
 
+### Submodule Usage (Helm Releases)
+All Helm submodules (NGINX Ingress, Prometheus, Grafana, ArgoCD) now accept the full kube_config object from your DigitalOcean Kubernetes cluster resource. Pass it as follows:
+
+```hcl
+module "nginx_ingress" {
+  source = "./modules/nginx_ingress"
+  kube_config = digitalocean_kubernetes_cluster.this.kube_config[0]
+  nginx_ingress_chart_version = var.nginx_ingress_chart_version
+  nginx_ingress_helm_values   = var.nginx_ingress_helm_values
+  enable_nginx_ingress        = var.enable_nginx_ingress
+}
+
+module "prometheus" {
+  source = "./modules/prometheus"
+  kube_config = digitalocean_kubernetes_cluster.this.kube_config[0]
+  prometheus_chart_version = var.prometheus_chart_version
+  prometheus_helm_values   = var.prometheus_helm_values
+  enable_prometheus        = var.enable_prometheus
+}
+
+module "grafana" {
+  source = "./modules/grafana"
+  kube_config = digitalocean_kubernetes_cluster.this.kube_config[0]
+  grafana_chart_version = var.grafana_chart_version
+  grafana_helm_values   = var.grafana_helm_values
+  enable_grafana        = var.enable_grafana
+}
+
+module "argocd" {
+  source = "./modules/argocd"
+  kube_config = digitalocean_kubernetes_cluster.this.kube_config[0]
+  argocd_chart_version = var.argocd_chart_version
+  argocd_helm_values   = var.argocd_helm_values
+  enable_argocd        = var.enable_argocd
+}
+```
+
 ### Notes on Outputs
 - `nginx_ingress_loadbalancer_ip` now outputs the raw Helm release status. To get the actual external IP, check the NGINX ingress service in your cluster after deployment.
 - `grafana_admin_password` and `argocd_admin_password` are only output if you explicitly set them in the corresponding Helm values YAML. If you use the chart's default (auto-generated) password, retrieve it from the cluster secrets after deployment.
@@ -121,6 +158,7 @@ terraform {
 - For Terraform Cloud, see the [Terraform Cloud documentation](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/configuration).
 
 ## Onboarding Tips
+- Pass the full kube_config object (from `digitalocean_kubernetes_cluster.this.kube_config[0]`) to all Helm submodules for a consistent and DRY interface.
 - Ensure your DigitalOcean API token has write permissions for Kubernetes, VPC, and Droplets.
 - Install the latest Terraform CLI (>= 1.3.0) and configure your credentials.
 - Review and customize the example YAML values files for Helm charts in `examples/complete/`.
